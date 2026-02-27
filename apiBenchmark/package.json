@@ -1,0 +1,29 @@
+{
+  "name": "api-benchmark-multi-protocol",
+  "version": "1.0.0",
+  "description": "6 server benchmark: REST, MQTT, SOAP, GraphQL, Webhooks, gRPC",
+  "scripts": {
+    "start:rest": "node servers/rest-server.js",
+    "start:mqtt": "node servers/mqtt-server.js",
+    "start:soap": "node servers/soap-server.js",
+    "start:graphql": "node servers/graphql-server.js",
+    "start:webhooks": "node servers/webhook-server.js",
+    "start:grpc": "node servers/grpc-server.js",
+    "start:all": "node servers/start-all.js",
+    "benchmark": "node benchmark/run-benchmark.js"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.10.0",
+    "@grpc/proto-loader": "^0.7.10",
+    "aedes": "^0.51.2",
+    "api-benchmark": "^0.0.9",
+    "axios": "^1.6.0",
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "express-graphql": "^0.12.0",
+    "graphql": "^15.8.0",
+    "mqtt": "^5.3.0",
+    "net": "^1.0.2",
+    "soap": "^1.0.0"
+  }
+}
