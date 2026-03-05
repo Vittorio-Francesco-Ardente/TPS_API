@@ -107,7 +107,7 @@ Il repository è organizzato in diverse sezioni, ognuna dedicata a una specifica
 
 ---
 
-## Benchmark
+# Benchmark
 
 Il sistema di benchmark è stato progettato per simulare diverse richieste e confrontare le API in termini di prestazioni.
 
@@ -122,21 +122,23 @@ I risultati dei benchmark verranno documentati nella sezione **docs** del proget
 
 ---
 
-## Possibili applicazioni
+# Possibili applicazioni
 
 Questo progetto può essere utile per:
 
-- Studenti che vogliono comprendere le differenze tra diverse API
-- Sviluppatori che vogliono scegliere la tecnologia più adatta
+- Studenti che vogliono comprendere le differenze tra diverse tecnologie API
+- Sviluppatori che vogliono scegliere la tecnologia più adatta a un determinato progetto
 - Studi comparativi sulle prestazioni dei sistemi distribuiti
 
 ---
 
-## Ruoli
+# Ruoli
 
-- API MQTT: ARDENTE VITTORIO FRANCESCO
-- API GRAPHQL: COLCOL JEROME
-- API GRPC: GAMBA ALESSANDRO
-- API SOAP: IQBAL UMAR
-- API WEBHOOKS: PREVITALI MATTIA
+| Tecnologia | Responsabile |
+|-----------|--------------|
+| MQTT | ARDENTE VITTORIO FRANCESCO |
+| GraphQL | COLCOL JEROME |
+| gRPC | GAMBA ALESSANDRO |
+| SOAP | IQBAL UMAR |
+| Webhooks | PREVITALI MATTIA |
 
