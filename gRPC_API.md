@@ -1,5 +1,29 @@
 # gRPC — Guida completa
 
+## Indice
+1. [Cos'è gRPC?](#1-cosè-grpc)
+2. [Come funziona (passo per passo)](#2-come-funziona-passo-per-passo)
+   - 2.1 [Definisci un contratto `.proto`](#21-definisci-un-contratto-proto)
+   - 2.2 [Generazione automatica del codice](#22-generazione-automatica-del-codice)
+   - 2.3 [Flusso di comunicazione](#23-flusso-di-comunicazione)
+3. [Efficienza e quantità di dati trasmessi](#3-efficienza-e-quantità-di-dati-trasmessi)
+   - 3.1 [JSON (REST)](#31-json-rest)
+   - 3.2 [Protobuf (gRPC)](#32-protobuf-grpc)
+   - 3.3 [Confronto reale](#33-confronto-reale)
+4. [Perché è più efficiente (tecnicamente)](#4-perché-è-più-efficiente-tecnicamente)
+   - 4.1 [HTTP/2](#41-http2)
+   - 4.2 [Binario vs testo](#42-binario-vs-testo)
+5. [gRPC vs REST](#5-grpc-vs-rest)
+6. [Tipi di comunicazione gRPC](#6-tipi-di-comunicazione-grpc)
+7. [API Gateway: il ponte con il mondo esterno](#7-api-gateway-il-ponte-con-il-mondo-esterno)
+8. [Implementazione in JavaScript (Node.js)](#8-implementazione-in-javascript-nodejs)
+   - 8.1 [Installazione](#81-installazione)
+   - 8.2 [File `user.proto`](#82-file-userproto)
+   - 8.3 [Server gRPC](#83-server-grpc)
+   - 8.4 [Client gRPC](#84-client-grpc)
+9. [Caso reale: microservizi e-commerce](#9-caso-reale-microservizi-e-commerce)
+10. [Riassunto](#10-riassunto)
+    
 ## 1. Cos'è gRPC?
 
 **gRPC** (Google Remote Procedure Call) è un framework RPC (Remote Procedure Call) universale, open source e ad alte prestazioni, sviluppato da Google e rilasciato nel 2015. È costruito sopra **HTTP/2** e usa **Protocol Buffers (Protobuf)** come formato di serializzazione.
