@@ -1,17 +1,14 @@
 /**
  * start-all.js
- * Avvia tutti e 6 i server in processi separati
+ * Avvia tutti e 4 i server in processi separati
  */
 const { spawn } = require('child_process');
 const path = require('path');
 
 const servers = [
   { name: 'REST     (3001)', file: 'rest-server.js',     port: 3001 },
-  { name: 'MQTT     (3002)', file: 'mqtt-server.js',     port: 3002 },
-  { name: 'SOAP     (3003)', file: 'soap-server.js',     port: 3003 },
-  { name: 'GraphQL  (3004)', file: 'graphql-server.js',  port: 3004 },
-  { name: 'Webhooks (3005)', file: 'webhook-server.js',  port: 3005 },
-  { name: 'gRPC     (3006)', file: 'grpc-server.js',     port: 3006 },
+  { name: 'GraphQL  (3002)', file: 'graphql-server.js',  port: 3002 },
+  { name: 'gRPC     (3003)', file: 'grpc-server.js',     port: 3003 },
 ];
 
 const colors = ['\x1b[32m', '\x1b[34m', '\x1b[35m', '\x1b[36m', '\x1b[33m', '\x1b[31m'];

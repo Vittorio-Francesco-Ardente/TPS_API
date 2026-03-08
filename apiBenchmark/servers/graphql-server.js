@@ -199,7 +199,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', server: 'GraphQL', endpoint: '/graphql' });
 });
 
-const PORT = 3004;
+const PORT = 3002;
 app.listen(PORT, () => {
   console.log(`✅ GraphQL Server avviato su http://localhost:${PORT}/graphql`);
   console.log(`   GraphiQL IDE: http://localhost:${PORT}/graphql`);

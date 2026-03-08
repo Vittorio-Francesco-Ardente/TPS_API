@@ -11,11 +11,8 @@ const path = require('path');
 // ─── CONFIGURAZIONE SERVERS ───────────────────────────────────────────────────
 const services = {
   REST:      'http://localhost:3001/',
-  MQTT:      'http://localhost:3002/',
-  SOAP:      'http://localhost:3003/',
-  GraphQL:   'http://localhost:3004/',
-  Webhooks:  'http://localhost:3005/',
-  gRPC:      'http://localhost:3006/',
+  GraphQL:   'http://localhost:3002/',
+  gRPC:      'http://localhost:3003/',
 };
 
 // ─── ROUTE COMUNI ─────────────────────────────────────────────────────────────
@@ -55,7 +52,7 @@ const restRoutes = {
 };
 
 // GraphQL - benchmark query diverse
-const graphqlService = { GraphQL: 'http://localhost:3004/' };
+const graphqlService = { GraphQL: 'http://localhost:3003/' };
 const graphqlRoutes = {
   'query users': {
     method: 'post',
@@ -80,38 +77,8 @@ const graphqlRoutes = {
   }
 };
 
-// MQTT Bridge
-const mqttService = { MQTT: 'http://localhost:3002/' };
-const mqttRoutes = {
-  'mqtt/ping': {
-    method: 'get',
-    route: 'mqtt/ping',
-    expectedStatusCode: 200
-  },
-  'mqtt/users': {
-    method: 'get',
-    route: 'mqtt/users',
-    expectedStatusCode: 200
-  }
-};
-
-// Webhooks
-const webhookService = { Webhooks: 'http://localhost:3005/' };
-const webhookRoutes = {
-  'subscriptions list': {
-    method: 'get',
-    route: 'webhooks/subscriptions',
-    expectedStatusCode: 200
-  },
-  'logs': {
-    method: 'get',
-    route: 'webhooks/logs',
-    expectedStatusCode: 200
-  }
-};
-
 // gRPC Bridge
-const grpcService = { gRPC: 'http://localhost:3006/' };
+const grpcService = { gRPC: 'http://localhost:3004/' };
 const grpcRoutes = {
   'grpc/users': {
     method: 'get',
@@ -245,8 +212,8 @@ function printCompareResults(title, results) {
 
 // ─── ESEGUI BENCHMARK ─────────────────────────────────────────────────────────
 async function runBenchmarks() {
-  console.log('\n🔧 api-benchmark - Confronto 6 protocolli API');
-  console.log('   REST | MQTT | SOAP | GraphQL | Webhooks | gRPC\n');
+  console.log('\n🔧 api-benchmark - Confronto 4 protocolli API');
+  console.log('   REST | SOAP | GraphQL |  gRPC\n');
 
   // 1. Confronto HEALTH CHECK su tutti i server
   console.log('⏳ [1/5] Confronto /health su tutti i server...');

@@ -203,7 +203,7 @@ app.post('/grpc/products', async (req, res) => {
   }
 });
 
-const HTTP_PORT = 3006;
+const HTTP_PORT = 3003;
 app.listen(HTTP_PORT, () => {
   console.log(`✅ gRPC HTTP Bridge avviato su http://localhost:${HTTP_PORT}`);
   console.log(`   GET  /health`);
