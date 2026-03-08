@@ -127,10 +127,10 @@ const grpcRoutes = {
 
 // ─── OPZIONI BENCHMARK ────────────────────────────────────────────────────────
 const options = {
-  debug: false,
+  debug: true,
   runMode: 'sequence',   // 'sequence' | 'parallel'
-  minSamples: 20,
-  maxTime: 10,
+  minSamples: 1000,
+  maxTime: 100,
   delay: 0,
   stopOnError: false     // continua anche in caso di errore
 };
@@ -161,8 +161,10 @@ function printResults(title, results) {
         console.log(`     📍 ${route}`);
         console.log(`        mean:    ${(s.mean * 1000).toFixed(2)} ms`);
         console.log(`        median:  ${(s.median * 1000).toFixed(2)} ms`);
-        console.log(`        ops/sec: ${s.hz ? s.hz.toFixed(2) : 'N/A'}`);
+        console.log(`        ops/sec: ${s.hz ? s.hz.toFixed(2) : (s.mean ? (1 / s.mean).toFixed(2) : 'N/A')}`);
         console.log(`        samples: ${s.sample ? s.sample.length : 'N/A'}`);
+        // Debug: mostra tutto l'oggetto stats
+        console.log(`        DEBUG stats:`, JSON.stringify(s, null, 2));
       } else if (stats && stats.error) {
         console.log(`     ❌ ${route}: ${stats.error}`);
       } else {
@@ -170,6 +172,30 @@ function printResults(title, results) {
       }
     }
   }
+}
+
+// Normalizza la struttura dei risultati per avere sempre: route → server → stats
+function normalizeCompareResults(results) {
+  // se la prima chiave corrisponde a un servizio (cioè i valori sono oggetti contenenti route)
+  const firstKey = Object.keys(results)[0];
+  if (firstKey && results[firstKey] && typeof results[firstKey] === 'object') {
+    const firstVal = results[firstKey];
+    // es. { REST: { health: { … } }, MQTT: { health: { … } } }
+    const maybeRouteKeys = Object.keys(firstVal);
+    if (maybeRouteKeys.length > 0) {
+      // presumiamo che la struttura sia servizio->route
+      const normalized = {};
+      for (const [service, routes] of Object.entries(results)) {
+        for (const [route, stats] of Object.entries(routes || {})) {
+          normalized[route] = normalized[route] || {};
+          normalized[route][service] = stats;
+        }
+      }
+      return normalized;
+    }
+  }
+  // altrimenti assumiamo sia già route->server
+  return results;
 }
 
 function printCompareResults(title, results) {
@@ -181,6 +207,8 @@ function printCompareResults(title, results) {
     console.log('  (nessun risultato)');
     return;
   }
+
+  results = normalizeCompareResults(results);
 
   // Confronto: mostra il vincitore per ogni route
   for (const [route, servers] of Object.entries(results)) {
@@ -198,6 +226,10 @@ function printCompareResults(title, results) {
           bestHz = hz;
           winner = server;
         }
+      } else if (stats) {
+        // molto probabilmente stats è l'oggetto intero, mostriamolo per debug
+        console.log(`     ⚠ struttura inattesa per ${server}:`);
+        console.dir(stats, { depth: 4 });
       }
     }
 
@@ -219,9 +251,16 @@ async function runBenchmarks() {
   // 1. Confronto HEALTH CHECK su tutti i server
   console.log('⏳ [1/5] Confronto /health su tutti i server...');
   await new Promise((resolve) => {
-    apiBenchmark.compare(services, commonRoutes, options, (err, results) => {
-      if (err) console.error('Errore:', err);
-      printCompareResults('CONFRONTO /health - Tutti i Server', results);
+    apiBenchmark.compare(services, commonRoutes, options, (error, results) => {
+      if (error) {
+        console.error('Errore compare:', error);
+        resolve();
+        return;
+      }
+      if (!results || typeof results !== 'object')
+        console.error('Errore compare: valori inattesi', results);
+      else
+        printCompareResults('CONFRONTO /health - Tutti i Server', results);
       resolve();
     });
   });
@@ -229,9 +268,18 @@ async function runBenchmarks() {
   // 2. Benchmark REST (sequenziale e parallelo)
   console.log('\n⏳ [2/5] Benchmark endpoint REST...');
   await new Promise((resolve) => {
-    apiBenchmark.measure(restService, restRoutes, options, (err, results) => {
-      if (err) console.error('Errore REST:', err);
-      printResults('BENCHMARK REST - Tutti gli endpoint', results);
+    // la libreria attuale fornisce solo `compare`, funziona anche con un singolo servizio
+    apiBenchmark.measure(restService, restRoutes, options, (error, results) => {
+      if (error) {
+        console.error('Errore REST:', error);
+        resolve();
+        return;
+      }
+      // la callback riceve *solo* i risultati, non un errore
+      if (!results || typeof results !== 'object')
+        console.error('Errore REST: valori inattesi', results);
+      else
+        printResults('BENCHMARK REST - Tutti gli endpoint', results);
       resolve();
     });
   });
@@ -239,9 +287,16 @@ async function runBenchmarks() {
   // 3. Benchmark GraphQL
   console.log('\n⏳ [3/5] Benchmark endpoint GraphQL...');
   await new Promise((resolve) => {
-    apiBenchmark.measure(graphqlService, graphqlRoutes, options, (err, results) => {
-      if (err) console.error('Errore GraphQL:', err);
-      printResults('BENCHMARK GraphQL - Query diverse', results);
+    apiBenchmark.measure(graphqlService, graphqlRoutes, options, (error, results) => {
+      if (error) {
+        console.error('Errore GraphQL:', error);
+        resolve();
+        return;
+      }
+      if (!results || typeof results !== 'object')
+        console.error('Errore GraphQL: valori inattesi', results);
+      else
+        printResults('BENCHMARK GraphQL - Query diverse', results);
       resolve();
     });
   });
@@ -249,9 +304,16 @@ async function runBenchmarks() {
   // 4. Benchmark gRPC Bridge
   console.log('\n⏳ [4/5] Benchmark gRPC (via HTTP Bridge)...');
   await new Promise((resolve) => {
-    apiBenchmark.measure(grpcService, grpcRoutes, options, (err, results) => {
-      if (err) console.error('Errore gRPC:', err);
-      printResults('BENCHMARK gRPC - Via HTTP Bridge', results);
+    apiBenchmark.measure(grpcService, grpcRoutes, options, (error, results) => {
+      if (error) {
+        console.error('Errore gRPC:', error);
+        resolve();
+        return;
+      }
+      if (!results || typeof results !== 'object')
+        console.error('Errore gRPC: valori inattesi', results);
+      else
+        printResults('BENCHMARK gRPC - Via HTTP Bridge', results);
       resolve();
     });
   });
@@ -264,9 +326,16 @@ async function runBenchmarks() {
     gRPC:    'http://localhost:3006/',
   };
   await new Promise((resolve) => {
-    apiBenchmark.compare(modernServices, commonRoutes, optionsParallel, (err, results) => {
-      if (err) console.error('Errore compare:', err);
-      printCompareResults('CONFRONTO PARALLELO: REST vs GraphQL vs gRPC', results);
+    apiBenchmark.compare(modernServices, commonRoutes, optionsParallel, (error, results) => {
+      if (error) {
+        console.error('Errore compare:', error);
+        resolve();
+        return;
+      }
+      if (!results || typeof results !== 'object')
+        console.error('Errore compare: valori inattesi', results);
+      else
+        printCompareResults('CONFRONTO PARALLELO: REST vs GraphQL vs gRPC', results);
       resolve();
     });
   });
@@ -274,15 +343,29 @@ async function runBenchmarks() {
   // ─── GENERA HTML REPORT ───────────────────────────────────────────────────
   console.log('\n⏳ Generazione HTML report...');
   await new Promise((resolve) => {
-    apiBenchmark.compare(services, commonRoutes, options, (err, results) => {
-      if (err) { console.error(err); resolve(); return; }
-      apiBenchmark.getHtml(results, (htmlErr, html) => {
-        if (htmlErr) { console.error(htmlErr); resolve(); return; }
-        const outPath = path.join(__dirname, 'report.html');
-        fs.writeFileSync(outPath, html);
-        console.log(`\n✅ HTML Report salvato in: ${outPath}`);
+    apiBenchmark.compare(services, commonRoutes, options, (error, results) => {
+      if (error) {
+        console.error('Errore generazione HTML:', error);
         resolve();
-      });
+        return;
+      }
+      if (!results || typeof results !== 'object') {
+        console.error('Errore generazione HTML: valori inattesi', results);
+        resolve();
+        return;
+      }
+      if (typeof apiBenchmark.getHtml === 'function') {
+        apiBenchmark.getHtml(results, (htmlErr, html) => {
+          if (htmlErr) { console.error(htmlErr); resolve(); return; }
+          const outPath = path.join(__dirname, 'report.html');
+          fs.writeFileSync(outPath, html);
+          console.log(`\n✅ HTML Report salvato in: ${outPath}`);
+          resolve();
+        });
+      } else {
+        console.log('⚠️  versione della libreria non supporta getHtml; saltato il report HTML.');
+        resolve();
+      }
     });
   });
 
