@@ -171,8 +171,8 @@ apiBenchmark.measure(service, routes, (err, results) => {
 // Confronta tutti i server
 const services = {
   REST:    'http://localhost:3001/',
-  GraphQL: 'http://localhost:3004/',
-  gRPC:    'http://localhost:3006/',
+  GraphQL: 'http://localhost:3002/',
+  gRPC:    'http://localhost:3003/',
 };
 
 apiBenchmark.compare(services, { health: 'health' }, (err, results) => {

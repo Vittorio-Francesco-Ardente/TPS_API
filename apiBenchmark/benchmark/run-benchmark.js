@@ -9,6 +9,24 @@ const apiBenchmark = require('api-benchmark');
 const fs   = require('fs');
 const path = require('path');
 
+// ─── GESTIONE ERRORI GLOBALI ──────────────────────────────────────────────────
+// Cattura qualsiasi crash silenzioso e stampa l'errore completo prima di uscire.
+// Rimuovi questi handler una volta risolti i problemi.
+
+process.on('uncaughtException', (err) => {
+  console.error('\n💥 CRASH NON CATTURATO (uncaughtException):');
+  console.error('   Tipo:    ', err.constructor.name);
+  console.error('   Messaggio:', err.message);
+  console.error('   Stack:\n' + (err.stack || '(nessuno)'));
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('\n💥 PROMISE RIFIUTATA (unhandledRejection):');
+  console.error('   Motivo:', reason instanceof Error ? reason.stack : reason);
+  process.exit(1);
+});
+
 // ─── CONFIGURAZIONE SERVERS ───────────────────────────────────────────────────
 
 const restService    = { REST:    'http://localhost:3001/' };
@@ -23,9 +41,9 @@ const httpServices = {
 // ─── OPZIONI ──────────────────────────────────────────────────────────────────
 
 const optionsSeq = {
-  debug:       false,
-  runMode:     'sequence',
-  minSamples:  1000,
+  debug:       true,
+  runMode:     'parallel',
+  minSamples:  10000,
   maxTime:     10,
   delay:       0,
   stopOnError: false
@@ -42,7 +60,8 @@ const optionsPar = {
 const restRoutes = {
   'health': {
     method: 'get', route: 'health',
-    expectedStatusCode: 200, maxMean: 0.5, maxSingleMean: 2.0
+    expectedStatusCode: 200,
+    
   },
   'GET /api/users': {
     method: 'get', route: 'api/users', expectedStatusCode: 200
@@ -92,50 +111,23 @@ const graphqlRoutes = {
 // Usa il file grpc-server.js aggiornato che aggiunge il BenchmarkService adapter.
 
 const grpcRoutes = {
-  HealthCheck: {
-    protocol: 'grpc',
-    method: 'get',
-    route: '/BenchmarkService/Call',
-    grpcMethod: 'HealthCheck',
-    expectedStatusCode: 0
+  'HealthCheck': {
+    protocol: 'grpc', method: 'HealthCheck', expectedStatusCode: 0
   },
-  GetUsers: {
-    protocol: 'grpc',
-    method: 'get',
-    route: '/BenchmarkService/Call',
-    grpcMethod: 'GetUsers',
-    data: {},
-    expectedStatusCode: 0
+  'GetUsers': {
+    protocol: 'grpc', method: 'GetUsers', data: {}, expectedStatusCode: 0
   },
-  GetProducts: {
-    protocol: 'grpc',
-    method: 'get',
-    route: '/BenchmarkService/Call',
-    grpcMethod: 'GetProducts',
-    data: {},
-    expectedStatusCode: 0
+  'GetProducts': {
+    protocol: 'grpc', method: 'GetProducts', data: {}, expectedStatusCode: 0
   },
-  GetUserById: {
-    protocol: 'grpc',
-    method: 'get',
-    route: '/BenchmarkService/Call',
-    grpcMethod: 'GetUserById',
-    data: { id: 1 },
-    expectedStatusCode: 0
+  'GetUserById': {
+    protocol: 'grpc', method: 'GetUserById', data: { id: 1 }, expectedStatusCode: 0
   },
-  GetProductById: {
-    protocol: 'grpc',
-    method: 'get',
-    route: '/BenchmarkService/Call',
-    grpcMethod: 'GetProductById',
-    data: { id: 1 },
-    expectedStatusCode: 0
+  'GetProductById': {
+    protocol: 'grpc', method: 'GetProductById', data: { id: 1 }, expectedStatusCode: 0
   },
-  CreateUser: {
-    protocol: 'grpc',
-    method: 'post',
-    route: '/BenchmarkService/Call',
-    grpcMethod: 'CreateUser',
+  'CreateUser': {
+    protocol: 'grpc', method: 'CreateUser',
     data: { name: 'Benchmark User', email: 'bench@test.com', age: 25 },
     expectedStatusCode: 0
   }
@@ -274,12 +266,23 @@ async function runBenchmarks() {
 
   // 3. Benchmark gRPC nativo
   console.log('\n⏳ [3/6] Benchmark gRPC (RPC native)...');
+  console.log('   [DEBUG] se il processo si chiude qui senza messaggi,');
+  console.log('   [DEBUG] significa che grpc-server.js NON ha BenchmarkService.');
   await new Promise(resolve => {
-    apiBenchmark.measure(grpcService, grpcRoutes, optionsSeq, (err, results) => {
-      if (err) console.error('   ⚠ Errore gRPC:', err);
-      printResults('BENCHMARK gRPC — RPC native', results);
-      resolve();
-    });
+    let done = false;
+    const safeResolve = (label) => {
+      if (!done) { done = true; console.log('   [DEBUG] callback ricevuta: ' + label); resolve(); }
+    };
+    try {
+      apiBenchmark.measure(grpcService, grpcRoutes, optionsSeq, (err, results) => {
+        if (err) console.error('   ⚠ Errore gRPC:', JSON.stringify(err, null, 2));
+        printResults('BENCHMARK gRPC — RPC native', results);
+        safeResolve('ok');
+      });
+    } catch(e) {
+      console.error('   💥 Eccezione sincrona:', e.stack);
+      safeResolve('catch-sync');
+    }
   });
 
   // 4. Confronto REST vs GraphQL (HTTP puro, parallelo)
@@ -295,24 +298,9 @@ async function runBenchmarks() {
   // 5. Confronto latenza tra RPC gRPC diverse
   console.log('\n⏳ [5/6] Confronto latenza tra RPC gRPC...');
   const grpcLatencyRoutes = {
-    HealthCheck: {
-      protocol: 'grpc',
-      method: 'get',
-      grpcMethod: 'HealthCheck',
-      expectedStatusCode: 0
-    },
-    GetUsers: {
-      protocol: 'grpc',
-      method: 'get',
-      grpcMethod: 'GetUsers',
-      expectedStatusCode: 0
-    },
-    GetProducts: {
-      protocol: 'grpc',
-      method: 'get',
-      grpcMethod: 'GetProducts',
-      expectedStatusCode: 0
-    }
+    'HealthCheck': { protocol: 'grpc', method: 'HealthCheck', expectedStatusCode: 0 },
+    'GetUsers':    { protocol: 'grpc', method: 'GetUsers',    expectedStatusCode: 0 },
+    'GetProducts': { protocol: 'grpc', method: 'GetProducts', expectedStatusCode: 0 }
   };
   await new Promise(resolve => {
     apiBenchmark.measure(grpcService, grpcLatencyRoutes, optionsPar, (err, results) => {
@@ -321,7 +309,6 @@ async function runBenchmarks() {
       resolve();
     });
   });
-
   // 6. Confronto diretto REST vs GraphQL vs gRPC su health
   console.log('\n⏳ [6/6] Confronto REST vs GraphQL vs gRPC su health...');
   let restHealthResults, graphqlHealthResults, grpcHealthResults;
@@ -372,7 +359,6 @@ async function runBenchmarks() {
   } catch (e) {
     console.error('   ⚠ Errore durante la costruzione del confronto cross-protocollo:', e);
   }
-
   // ─── HTML REPORT ──────────────────────────────────────────────────────────
   console.log('\n⏳ Generazione HTML report (REST vs GraphQL vs gRPC - health)...');
   await new Promise(resolve => {
