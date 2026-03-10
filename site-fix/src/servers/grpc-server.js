@@ -26,7 +26,7 @@ const GRPC_PORT        = 3003;   // transport gRPC binario (HTTP/2)
 const HTTP_HEALTH_PORT = 3004;   // health check HTTP per il frontend React
 
 // ─── CARICA PROTO APPLICATIVO ─────────────────────────────────────────────────
-const PROTO_PATH = path.join(__dirname, '../proto/service.proto');
+const PROTO_PATH = path.join(__dirname, '../../proto/service.proto');
 const packageDef = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true, longs: String, enums: String, defaults: true, oneofs: true
 });
@@ -35,7 +35,7 @@ const proto = grpc.loadPackageDefinition(packageDef).userservice;
 // ─── CARICA PROTO BENCHMARK (api-benchmark interno) ───────────────────────────
 const BM_PROTO_PATH = path.join(
   __dirname,
-  '../node_modules/api-benchmark/lib/grpc-benchmark.proto'
+  '../../node_modules/api-benchmark/lib/grpc-benchmark.proto'
 );
 const bmPackageDef = protoLoader.loadSync(BM_PROTO_PATH, {
   keepCase: true, longs: String, enums: String, defaults: true, oneofs: true

@@ -1,19 +1,32 @@
 import { PROTOCOL_DATA } from '../data/protocols';
 
+const BENCHMARKABLE = new Set(['REST', 'GraphQL', 'gRPC']);
+
 export function ProtocolCards() {
   return (
     <div className="space-y-4">
       <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
         <h3 className="text-base font-semibold text-white mb-0.5">📚 Protocol Reference</h3>
-        <p className="text-xs text-gray-500">Each protocol is implemented as a real server in a separate Web Worker</p>
+        <p className="text-xs text-gray-500">
+          <span className="text-blue-400 font-medium">REST · GraphQL · gRPC</span> have real Node.js backend servers (ports 3001–3003) and can be benchmarked.
+          {' '}<span className="text-gray-600">SOAP · MQTT · Webhooks</span> are documented for reference only.
+        </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-        {PROTOCOL_DATA.map(p => (
-          <div key={p.name} className="bg-gray-900 rounded-2xl border border-gray-800 p-4 hover:border-gray-700 transition">
+        {PROTOCOL_DATA.map(p => {
+          const isBenchmarkable = BENCHMARKABLE.has(p.name);
+          return (
+          <div key={p.name} className={`bg-gray-900 rounded-2xl border p-4 hover:border-gray-700 transition ${isBenchmarkable ? 'border-gray-800' : 'border-gray-800/50 opacity-80'}`}>
             <div className="flex items-center gap-2.5 mb-3">
               <span className="text-2xl">{p.icon}</span>
-              <div>
-                <h4 className="text-white font-bold">{p.name}</h4>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-white font-bold">{p.name}</h4>
+                  {isBenchmarkable
+                    ? <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 font-medium">✓ Benchmarkable</span>
+                    : <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-700/50 border border-gray-700 text-gray-500 font-medium">Info only</span>
+                  }
+                </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <div className="w-8 h-0.5 rounded-full" style={{ backgroundColor: p.color }} />
                   <span className="text-[10px] text-gray-500">{p.format}</span>
@@ -44,7 +57,8 @@ export function ProtocolCards() {
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

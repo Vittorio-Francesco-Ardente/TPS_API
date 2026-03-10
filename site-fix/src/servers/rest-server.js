@@ -11,7 +11,9 @@ const os         = require('os');
 
 const NUM_CORES = os.cpus().length;
 
+const cors = require('cors');
 const app = express();
+app.use(cors());
 
 // Aumenta il limite del body parser per accettare payload grandi (es. 64 KB)
 app.use(bodyParser.json({ limit: '1mb' }));

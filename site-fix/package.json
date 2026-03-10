@@ -1,0 +1,43 @@
+{
+  "name": "api-benchmark-merged",
+  "private": true,
+  "version": "1.0.0",
+  "description": "API Protocol Benchmark — Real Node.js backend (REST/GraphQL/gRPC) + React frontend with Protocol Guide for all 6 protocols",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start:rest": "node src/servers/rest-server.js",
+    "start:graphql": "node src/servers/graphql-server.js",
+    "start:grpc": "node src/servers/grpc-server.js",
+    "start:servers": "node src/servers/start-all.js",
+    "benchmark": "node benchmark/run-benchmark.js"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.10.0",
+    "@grpc/proto-loader": "^0.7.10",
+    "api-benchmark": "github:PogiXD/api-benchmark-remake#tentativo_1",
+    "axios": "^1.6.0",
+    "body-parser": "^1.20.2",
+    "clsx": "2.1.1",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "express-graphql": "^0.12.0",
+    "graphql": "^15.8.0",
+    "lucide-react": "^0.574.0",
+    "react": "^19.2.3",
+    "react-dom": "19.2.3",
+    "recharts": "^3.7.0",
+    "tailwind-merge": "3.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.1.17",
+    "@types/node": "^22.0.0",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "5.1.1",
+    "tailwindcss": "4.1.17",
+    "typescript": "5.9.3",
+    "vite": "7.2.4"
+  }
+}

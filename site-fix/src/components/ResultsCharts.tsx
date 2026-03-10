@@ -1,39 +1,78 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Cell } from 'recharts';
-import type { ProtocolResult } from '../types/benchmark';
+import type { ProtocolMetrics } from '../types/benchmark';
 import { PROTOCOL_COLORS } from '../data/protocols';
 
-interface Props { results: ProtocolResult[]; }
+interface Props { results: ProtocolMetrics[]; }
 
 export function ResultsCharts({ results }: Props) {
   if (results.length === 0) return null;
 
-  const latencyData = results.map(r => ({ name: r.protocol, Avg: r.clientLatency.avg, Median: r.clientLatency.median, P95: r.clientLatency.p95, P99: r.clientLatency.p99 }));
-  const throughputData = results.map(r => ({ name: r.protocol, 'req/s': r.clientThroughputRps, color: PROTOCOL_COLORS[r.protocol] }));
-  const transferData = results.map(r => ({ name: r.protocol, 'Overhead (B)': r.protocolOverheadBytes, 'Avg Payload (B)': r.avgPayloadSizeBytes, 'Avg Response (B)': r.avgResponseSizeBytes }));
-  const timingData = results.map(r => ({ name: r.protocol, 'Build Payload': r.avgPayloadBuildMs, 'Send (Worker IPC)': r.avgSendMs, 'Parse Response': r.avgResponseParseMs }));
+  const latencyData = results.map(r => ({ name: r.protocol, Avg: r.meanLatencyMs, Median: r.medianLatencyMs, P95: r.p95LatencyMs, P99: r.p99LatencyMs }));
+  const throughputData = results.map(r => ({ name: r.protocol, 'req/s': r.throughput, color: PROTOCOL_COLORS[r.protocol] }));
 
-  const maxLat = Math.max(...results.map(r => r.clientLatency.avg), 0.001);
-  const maxThr = Math.max(...results.map(r => r.clientThroughputRps), 0.001);
-  const maxOvh = Math.max(...results.map(r => r.protocolOverheadBytes), 1);
-  const maxJit = Math.max(...results.map(r => r.clientLatency.p99 - r.clientLatency.median), 0.001);
+const maxLat = Math.max(...results.map(r => r.meanLatencyMs), 0.001);
+const maxThr = Math.max(...results.map(r => r.throughput), 0.001);
+const varianceData = results.map(r => ({
+    name: r.protocol,
+    Min:    Math.min(...r.latencySamples),
+    Avg:    r.meanLatencyMs,
+    Max:    Math.max(...r.latencySamples),
+    StdDev: r.deviationLatencyMs,
+    color: PROTOCOL_COLORS[r.protocol],
+  }));
+const maxJit = Math.max(
+  ...results.map(r => r.p99LatencyMs - r.medianLatencyMs),
+  0.001
+);
 
-  const radarData = [
-    { metric: 'Speed', ...Object.fromEntries(results.map(r => [r.protocol, Math.max(0, Math.round((1 - r.clientLatency.avg / maxLat) * 100))])) },
-    { metric: 'Throughput', ...Object.fromEntries(results.map(r => [r.protocol, Math.round((r.clientThroughputRps / maxThr) * 100)])) },
-    { metric: 'Efficiency', ...Object.fromEntries(results.map(r => [r.protocol, Math.max(0, Math.round((1 - r.protocolOverheadBytes / maxOvh) * 100))])) },
-    { metric: 'Reliability', ...Object.fromEntries(results.map(r => [r.protocol, Math.round((1 - r.errorRate / 100) * 100)])) },
-    { metric: 'Consistency', ...Object.fromEntries(results.map(r => [r.protocol, Math.max(0, Math.round((1 - (r.clientLatency.p99 - r.clientLatency.median) / maxJit) * 100))])) },
-  ];
-
-  const varianceData = results.map(r => ({ name: r.protocol, Min: r.clientLatency.min, Avg: r.clientLatency.avg, Max: r.clientLatency.max, StdDev: r.clientLatency.stdDev, color: PROTOCOL_COLORS[r.protocol] }));
-
+const radarData = [
+  {
+    metric: 'Speed',
+    ...Object.fromEntries(
+      results.map(r => [
+        r.protocol,
+        Math.max(0, Math.round((1 - r.meanLatencyMs / maxLat) * 100))
+      ])
+    )
+  },
+  {
+    metric: 'Throughput',
+    ...Object.fromEntries(
+      results.map(r => [
+        r.protocol,
+        Math.round((r.throughput / maxThr) * 100)
+      ])
+    )
+  },
+  {
+    metric: 'Reliability',
+    ...Object.fromEntries(
+      results.map(r => [
+        r.protocol,
+        Math.round((1 - r.errorCount / 100) * 100)
+      ])
+    )
+  },
+  {
+    metric: 'Consistency',
+    ...Object.fromEntries(
+      results.map(r => [
+        r.protocol,
+        Math.max(
+          0,
+          Math.round((1 - (r.p99LatencyMs - r.medianLatencyMs) / maxJit) * 100)
+        )
+      ])
+    )
+  }
+];
   const tt = { backgroundColor: '#111827', border: '1px solid #374151', borderRadius: 12, fontSize: 12 };
 
   return (
     <div className="space-y-4">
       <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
         <h3 className="text-base font-semibold text-white mb-0.5">⏱️ Client Latency Percentiles (ms)</h3>
-        <p className="text-xs text-gray-500 mb-4">Round-trip: payload build → Worker IPC → response parse</p>
+        <p className="text-xs text-gray-500 mb-4">Round-trip: payload build → HTTP fetch → response parse</p>
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={latencyData} barGap={1} barSize={16}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" /><XAxis dataKey="name" stroke="#6b7280" fontSize={11} /><YAxis stroke="#6b7280" fontSize={10} />
@@ -70,7 +109,7 @@ export function ResultsCharts({ results }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
           <h3 className="text-base font-semibold text-white mb-0.5">📊 Payload & Overhead</h3>
           <p className="text-xs text-gray-500 mb-4">Protocol overhead vs actual payload bytes</p>
@@ -93,7 +132,7 @@ export function ResultsCharts({ results }: Props) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div> */}
 
       <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
         <h3 className="text-base font-semibold text-white mb-0.5">📉 Latency Variance</h3>

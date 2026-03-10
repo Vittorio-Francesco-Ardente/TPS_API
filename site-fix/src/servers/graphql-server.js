@@ -25,7 +25,9 @@ const {
 
 const NUM_CORES = os.cpus().length;
 
+const cors = require('cors');
 const app = express();
+app.use(cors());
 
 // ─── DATABASE IN-MEMORY ───────────────────────────────────────────────────────
 let users = [
