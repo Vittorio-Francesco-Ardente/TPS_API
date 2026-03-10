@@ -1,7 +1,6 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, LineChart, Line, Cell, RadarChart,
-  PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  ResponsiveContainer, LineChart, Line, Cell,
 } from 'recharts';
 import React from 'react';
 import type { ProtocolMetrics} from '../types/benchmark';
@@ -91,21 +90,6 @@ export function MetricsPanel({ results }: Props) {
     color: PROTOCOL_COLORS[r.protocol],
   }));
 
-  // ── 7. Radar — solo metriche reali ──────────────────────────────────────
-  const maxLat = Math.max(...results.map(r => r.meanLatencyMs), 0.001);
-  const maxThr = Math.max(...results.map(r => r.throughput), 0.001);
-  const maxJit = Math.max(...results.map(r => r.p99LatencyMs - r.medianLatencyMs), 0.001);
-  const maxMem = hasMemory ? Math.max(...results.filter(r => r.metrics.memory.samples > 0).map(r => r.metrics.memory.peak), 1) : 1;
-  const maxCpu = hasCpu    ? Math.max(...results.filter(r => r.metrics.cpu.samples > 0).map(r => r.metrics.cpu.peak),    1) : 1;
-
-  const radarData = [
-    { metric: 'Speed',       ...Object.fromEntries(results.map(r => [r.protocol, Math.max(0, Math.round((1 - r.meanLatencyMs / maxLat) * 100))])) },
-    { metric: 'Throughput',  ...Object.fromEntries(results.map(r => [r.protocol, Math.round((r.throughput / maxThr) * 100)])) },
-    { metric: 'Consistency', ...Object.fromEntries(results.map(r => [r.protocol, Math.max(0, Math.round((1 - (r.p99LatencyMs - r.medianLatencyMs) / maxJit) * 100))])) },
-    { metric: 'Reliability', ...Object.fromEntries(results.map(r => [r.protocol, Math.round((1 - r.errorCount / 100) * 100)])) },
-    ...(hasMemory ? [{ metric: 'Low Memory', ...Object.fromEntries(results.map(r => [r.protocol, r.metrics.memory.samples > 0 ? Math.max(0, Math.round((1 - r.metrics.memory.peak / maxMem) * 100)) : 50])) }] : []),
-    ...(hasCpu    ? [{ metric: 'Low CPU',    ...Object.fromEntries(results.map(r => [r.protocol, r.metrics.cpu.samples > 0 ? Math.max(0, Math.round((1 - r.metrics.cpu.peak / maxCpu)    * 100)) : 50])) }] : []),
-  ];
 
   return (
     <div className="space-y-4">
