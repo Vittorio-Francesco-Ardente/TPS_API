@@ -6,10 +6,11 @@ import type {
 
 const BENCHMARK_SERVER = 'http://localhost:3005';
 
-const BASE: Record<'REST' | 'GraphQL' | 'gRPC', string> = {
+const BASE: Record<'REST' | 'GraphQL' | 'gRPC' | 'SOAP', string> = {
   REST:    'http://localhost:3001',
   GraphQL: 'http://localhost:3002',
   gRPC:    'http://localhost:3004',
+  SOAP:    'http://localhost:3006',
 };
 
 export type ProgressCallback = (
@@ -75,12 +76,13 @@ export async function runFullBenchmark(
   return results;
 }
 
-export async function checkServersOnline(): Promise<Record<'REST' | 'GraphQL' | 'gRPC' | 'Benchmark', boolean>> {
-  const out = { REST: false, GraphQL: false, gRPC: false, Benchmark: false };
+export async function checkServersOnline(): Promise<Record<'REST' | 'GraphQL' | 'gRPC' | 'SOAP' | 'Benchmark', boolean>> {
+  const out = { REST: false, GraphQL: false, gRPC: false, SOAP: false, Benchmark: false };
   const checks: [keyof typeof out, string][] = [
     ['REST',      `${BASE.REST}/health`],
     ['GraphQL',   `${BASE.GraphQL}/health`],
     ['gRPC',      `${BASE.gRPC}/health`],
+    ['SOAP',      `${BASE.SOAP}/health`],
     ['Benchmark', `${BENCHMARK_SERVER}/health`],
   ];
   await Promise.all(
