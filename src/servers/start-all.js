@@ -5,6 +5,7 @@ const servers = [
   { name: 'REST        (3001)', file: 'rest-server.js',       port: 3001 },
   { name: 'GraphQL     (3002)', file: 'graphql-server.js',    port: 3002 },
   { name: 'gRPC        (3003)', file: 'grpc-server.js',       port: 3003 },
+  { name: 'SOAP        (3006)', file: 'soap-server.js',       port: 3006 },
   { name: 'Benchmark   (3005)', file: 'benchmark-server.js',  port: 3005 },
 ];
 

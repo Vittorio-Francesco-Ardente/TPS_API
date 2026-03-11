@@ -54,6 +54,7 @@ const METRICS_URLS = {
   REST:    'http://localhost:3001/metrics',
   GraphQL: 'http://localhost:3002/metrics',
   gRPC:    'http://localhost:3004/metrics',
+  SOAP:    'http://localhost:3006/metrics',
 };
 
 function startSampling(label, metricsUrl, intervalMs = 250) {
@@ -237,6 +238,22 @@ app.post('/run', async (req, res) => {
       },
       routeKey: 'CreateProduct',
     },
+    SOAP: {
+      service: { SOAP: 'http://localhost:3006/soap' },
+      routes: {
+        'CreateProduct': {
+          protocol: 'soap',
+          wsdl: 'http://localhost:3006/soap?wsdl',
+          operation: 'CreateProduct',
+          data: {
+            name: 'Prodotto Bench', price: 49.99, stock: 10, category: 'bench',
+            notes: pad(payloadBytes, 50),
+          },
+          expectedStatusCode: 200,
+        },
+      },
+      routeKey: 'CreateProduct',
+    },
   };
 
   runStatus = 'running';
@@ -253,12 +270,11 @@ app.post('/run', async (req, res) => {
       const tStart  = Date.now();
 
       const results  = await measure(def.service, def.routes, baseOptions);
-      console.log(results[protocol][def.routeKey]);
+      console.log(results?.[protocol]?.[def.routeKey]);
       const elapsed  = Date.now() - tStart;
       const resources = await sampler.stop();
 
-      
-      crossProto[protocol] = results[protocol];;
+      crossProto[protocol] = results?.[protocol] ?? {};
       console.log(crossProto);
       output.push(toProtocolMetrics(protocol, def.routeKey, results, elapsed, resources));
     }
