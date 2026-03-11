@@ -35,7 +35,7 @@ function ReportViewer() {
 function ServerStatusPanel({
   status, checking, onRefresh,
 }: {
-  status: Record<'REST'|'GraphQL'|'gRPC'|'Benchmark', boolean> | null;
+  status: Record<'REST'|'GraphQL'|'gRPC'|'SOAP'|'Benchmark', boolean> | null;
   checking: boolean;
   onRefresh: () => void;
 }) {
@@ -43,6 +43,7 @@ function ServerStatusPanel({
     { name: 'REST',    port: 3001, icon: '🌐' },
     { name: 'GraphQL', port: 3002, icon: '◈'  },
     { name: 'gRPC',    port: 3003, icon: '⚡', httpPort: 3004 },
+    { name: 'SOAP',    port: 3006, icon: '📦' },
     { name: 'Benchmark', port: 3005, icon: '🔬' },
   ] as const;
 
@@ -106,7 +107,7 @@ export function App() {
   const [history,           setHistory]           = useState<BenchmarkRun[]>([]);
   const [selectedRunId,     setSelectedRunId]     = useState<string | null>(null);
   const [activeTab,         setActiveTab]         = useState<TabType>('metrics');
-  const [serverStatus,      setServerStatus]      = useState<Record<'REST'|'GraphQL'|'gRPC'|'Benchmark', boolean> | null>(null);
+  const [serverStatus,      setServerStatus]      = useState<Record<'REST'|'GraphQL'|'gRPC'|'SOAP'|'Benchmark', boolean> | null>(null);
   const [checkingServers,   setCheckingServers]   = useState(true);
 
   const refreshServerStatus = useCallback(async () => {
@@ -172,7 +173,7 @@ export function App() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-base shadow-lg shadow-blue-500/20">⚡</div>
               <div>
                 <h1 className="text-base font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">API Protocol Benchmark</h1>
-                <p className="text-[10px] text-gray-500">Fetch HTTP reale → Node.js servers · REST · GraphQL · gRPC · Memoria · CPU</p>
+                <p className="text-[10px] text-gray-500">Fetch HTTP reale → Node.js servers · REST · GraphQL · gRPC · SOAP · Memoria · CPU</p>
               </div>
             </div>
             <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-gray-500">
@@ -231,7 +232,7 @@ export function App() {
                 <div className="text-5xl mb-3">🔬</div>
                 <h3 className="text-lg font-bold text-white mb-1">Nessun dato</h3>
                 <p className="text-sm text-gray-400 max-w-lg mx-auto mb-5">
-                  Configura i parametri e avvia il benchmark. REST, GraphQL e gRPC girano su server{' '}
+                  Configura i parametri e avvia il benchmark. REST, GraphQL, gRPC e SOAP girano su server{' '}
                   <strong>Node.js reali</strong> — latenza e throughput misurati con{' '}
                   <code className="text-blue-400 text-xs bg-gray-800 px-1 py-0.5 rounded">performance.now()</code>,
                   memoria e CPU campionati in tempo reale da{' '}
@@ -242,6 +243,7 @@ export function App() {
                     { n: 'REST',    d: 'JSON + HTTP routing (port 3001)',        i: '🌐' },
                     { n: 'GraphQL', d: 'Query parsing + resolvers (port 3002)',   i: '◈'  },
                     { n: 'gRPC',    d: 'Protobuf binary encode/decode (port 3003)', i: '⚡' },
+                    { n: 'SOAP',    d: 'WSDL + XML operation dispatch (port 3006)', i: '📦' },
                   ].map(p => (
                     <div key={p.n} className="px-3 py-2 rounded-lg bg-blue-500/5 border border-blue-500/20 text-left">
                       <div className="text-xs text-white font-medium">{p.i} {p.n}</div>
@@ -249,7 +251,7 @@ export function App() {
                     </div>
                   ))}
                 </div>
-                <p className="text-[11px] text-gray-600">SOAP · MQTT · Webhooks sono documentati nel Protocol Guide</p>
+                <p className="text-[11px] text-gray-600">MQTT · Webhooks sono documentati nel Protocol Guide</p>
               </div>
             )}
 
@@ -263,7 +265,7 @@ export function App() {
             <span className="text-gray-500 font-medium">Metriche reali:</span>{' '}
             Latenza (performance.now()), Throughput (req/s), Memoria heap (MB) e CPU % da /metrics.{' '}
             <span className="text-gray-700">Info-only:</span>{' '}
-            SOAP · MQTT · Webhooks — documentati nel Protocol Guide.
+            MQTT · Webhooks — documentati nel Protocol Guide.
           </p>
         </div>
       </footer>

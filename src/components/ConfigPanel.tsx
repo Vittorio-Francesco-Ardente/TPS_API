@@ -4,8 +4,8 @@ import { PROTOCOL_DATA } from '../data/protocols';
 
 interface Props { onRun: (config: BenchmarkConfig) => void; isRunning: boolean; }
 
-const ALL_PROTOCOLS: ProtocolType[] = ['REST', 'GraphQL', 'gRPC'];
-const INFO_ONLY_PROTOCOLS: ProtocolType[] = ['SOAP', 'MQTT', 'Webhooks'];
+const ALL_PROTOCOLS: ProtocolType[] = ['REST', 'GraphQL', 'gRPC', 'SOAP'];
+const INFO_ONLY_PROTOCOLS: ProtocolType[] = ['MQTT', 'Webhooks'];
 
 export function ConfigPanel({ onRun, isRunning }: Props) {
   const [selected, setSelected] = useState<ProtocolType[]>([...ALL_PROTOCOLS]);
@@ -29,7 +29,7 @@ export function ConfigPanel({ onRun, isRunning }: Props) {
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-1">Benchmarkable Protocols</label>
         <p className="text-[10px] text-gray-500 mb-2">These run on real Node.js servers via the backend</p>
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           {ALL_PROTOCOLS.map(p => {
             const info = PROTOCOL_DATA.find(d => d.name === p)!;
             const sel = selected.includes(p);
@@ -49,7 +49,7 @@ export function ConfigPanel({ onRun, isRunning }: Props) {
         </button>
         <div className="mt-3 pt-3 border-t border-gray-800">
           <p className="text-[10px] text-gray-600 mb-1.5">📚 Info-only (no backend server)</p>
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
             {INFO_ONLY_PROTOCOLS.map(p => {
               const info = PROTOCOL_DATA.find(d => d.name === p)!;
               return (

@@ -1,6 +1,6 @@
 import { PROTOCOL_DATA } from '../data/protocols';
 
-const BENCHMARKABLE = new Set(['REST', 'GraphQL', 'gRPC']);
+const BENCHMARKABLE = new Set(['REST', 'GraphQL', 'gRPC', 'SOAP']);
 
 export function ProtocolCards() {
   return (
@@ -8,8 +8,8 @@ export function ProtocolCards() {
       <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
         <h3 className="text-base font-semibold text-white mb-0.5">📚 Protocol Reference</h3>
         <p className="text-xs text-gray-500">
-          <span className="text-blue-400 font-medium">REST · GraphQL · gRPC</span> have real Node.js backend servers (ports 3001–3003) and can be benchmarked.
-          {' '}<span className="text-gray-600">SOAP · MQTT · Webhooks</span> are documented for reference only.
+          <span className="text-blue-400 font-medium">REST · GraphQL · gRPC · SOAP</span> have real Node.js backend servers (ports 3001, 3002, 3003, 3006) and can be benchmarked.
+          {' '}<span className="text-gray-600">MQTT · Webhooks</span> are documented for reference only.
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">

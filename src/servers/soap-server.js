@@ -9,12 +9,16 @@
 const express = require('express');
 const http = require('http');
 const os = require('os');
+const cors = require('cors');
 const soap = require('soap');
 
 const NUM_CORES = os.cpus().length;
 const PORT = 3006;
 
 const app = express();
+
+// Frontend runs on a different origin (Vite :5173), so health/metrics need CORS.
+app.use(cors());
 
 const db = {
 	products: [
