@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package userservice;
+
+// ── Service Definition ────────────────────────────────────────────────────────
+service UserService {
+  rpc GetUsers    (EmptyRequest)       returns (UsersResponse);
+  rpc GetUserById (UserByIdRequest)    returns (UserResponse);
+  rpc CreateUser  (CreateUserRequest)  returns (MutationResponse);
+  rpc DeleteUser  (UserByIdRequest)    returns (MutationResponse);
+  rpc HealthCheck (EmptyRequest)       returns (HealthResponse);
+}
+
+service ProductService {
+  rpc GetProducts   (EmptyRequest)          returns (ProductsResponse);
+  rpc GetProductById(ProductByIdRequest)    returns (ProductResponse);
+  rpc CreateProduct (CreateProductRequest)  returns (MutationResponse);
+}
+
+// ── Messages ──────────────────────────────────────────────────────────────────
+message EmptyRequest {}
+
+message UserByIdRequest {
+  int32 id = 1;
+}
+
+message CreateUserRequest {
+  string name  = 1;
+  string email = 2;
+  int32  age   = 3;
+  string role  = 4;
+}
+
+message User {
+  int32  id    = 1;
+  string name  = 2;
+  string email = 3;
+  int32  age   = 4;
+  string role  = 5;
+}
+
+message UserResponse {
+  bool   success = 1;
+  User   user    = 2;
+  string message = 3;
+}
+
+message UsersResponse {
+  bool          success = 1;
+  repeated User users   = 2;
+  int32         count   = 3;
+}
+
+message MutationResponse {
+  bool   success = 1;
+  string message = 2;
+  int32  id      = 3;
+}
+
+message HealthResponse {
+  string status    = 1;
+  string server    = 2;
+  string timestamp = 3;
+}
+
+// ── Product Messages ──────────────────────────────────────────────────────────
+message ProductByIdRequest {
+  int32 id = 1;
+}
+
+message CreateProductRequest {
+  string name     = 1;
+  double price    = 2;
+  int32  stock    = 3;
+  string category = 4;
+}
+
+message Product {
+  int32  id       = 1;
+  string name     = 2;
+  double price    = 3;
+  int32  stock    = 4;
+  string category = 5;
+}
+
+message ProductResponse {
+  bool    success = 1;
+  Product product = 2;
+  string  message = 3;
+}
+
+message ProductsResponse {
+  bool             success  = 1;
+  repeated Product products = 2;
+  int32            count    = 3;
+}
