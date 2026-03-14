@@ -130,9 +130,6 @@ Di seguito includiamo grafici/figure pubbliche e autorevoli. Per rispetto delle 
   - Fonte: Apache CXF, “Performance” — https://cxf.apache.org/performance.html
   - Cosa mostra: tabelle e grafici comparativi per JAX‑WS (SOAP) vs JAX‑RS (REST).
 
-Nota su licenze e incorporamento:
-- Prima di incorporare direttamente un’immagine di terzi in un README pubblico, verifica la licenza (molti blog sono tutti i diritti riservati; i repo OSS spesso usano licenze permissive o CC BY‑SA).
-- In assenza di permesso esplicito, linka la pagina originale (come sopra) o scarica l’immagine indicando credito e licenza nel README.
 
 # Confronto rapido
 - SOAP
