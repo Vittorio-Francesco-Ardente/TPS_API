@@ -191,8 +191,6 @@ flowchart TD
 - SOAP — IQBAL UMAR
 - Webhooks — PREVITALI MATTIA
 
-# Licenza
-Scegli una licenza chiara (es. MIT, Apache‑2.0, GPL‑3.0). Guida: https://choosealicense.com/
 
 # Sitografia (fonti verificate)
 - SOAP
